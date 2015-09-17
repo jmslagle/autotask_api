@@ -1,3 +1,5 @@
+require 'pry'
+
 module AutotaskAPI
   class Entity
     class_attribute :fields, :client, :find_cache
@@ -49,6 +51,18 @@ module AutotaskAPI
       define_method name do
         klass.constantize.find id, options[:foreign_key]
       end
+    end
+
+    def to_xml()
+      xml = raw_xml
+      fields.each do |field|
+        f=xml.at_xpath("Autotask:#{field.to_s == 'id' ? 'id' : field.to_s.camelize.gsub(/Id$/, 'ID')}",
+                       Autotask: Client::NAMESPACE)
+        if f 
+          f.content = attributes[field]
+        end
+      end
+      xml
     end
   end
 end
